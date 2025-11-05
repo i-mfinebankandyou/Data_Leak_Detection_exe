@@ -1,7 +1,10 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-})
+  base: "./", // ✅ build 후 로컬 경로에서 index.html 로드 가능
+  build: {
+    outDir: "dist",
+  },
+});
