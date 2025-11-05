@@ -1,5 +1,8 @@
 import React, { useCallback, useState } from "react";
 
+// Upstage AI API 지원 받기 신청해서 받은 api key
+const API_KEY = "";
+
 const App: React.FC = () => {
   const [fileName, setFileName] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("PDF 파일을 드래그하세요");
@@ -14,14 +17,37 @@ const App: React.FC = () => {
 
     setFileName(file.name);
     setStatus("업로드 중... 🚀");
-
+  
     try {
-      const formData = new FormData();
-      formData.append("file", file);
+      // 업로드한 파일의 텍스트 추출
+      const parseFormData = new FormData();
+      parseFormData.append("document", file);
+      parseFormData.append("output_formats", JSON.stringify(["html", "text"]));
+      parseFormData.append("base64_encoding", JSON.stringify(["table"]));
+      parseFormData.append("ocr", "auto");
+      parseFormData.append("coordinates", "true");
+      parseFormData.append("model", "document-parse");
+
+      const response = await fetch(
+        "https://api.upstage.ai/v1/document-digitization",
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${API_KEY}` },
+          body: parseFormData,
+        }
+      );
+
+      const responseJson = await response.json();
+      const fileText = responseJson.content.text;
+      console.log(fileText)
+      //
+
+      const uploadFormData = new FormData();
+      uploadFormData.append("text", fileText);
 
       const res = await fetch("https://example.com/upload", {
         method: "POST",
-        body: formData,
+        body: uploadFormData,
       });
 
       if (res.ok) {
@@ -29,9 +55,8 @@ const App: React.FC = () => {
       } else {
         setStatus("업로드 실패 ❌");
       }
-    } catch (err) {
-      console.error(err);
-      setStatus("에러 발생 ❌");
+    } catch (error) {
+      console.error("Error:", error);
     }
   }, []);
 
