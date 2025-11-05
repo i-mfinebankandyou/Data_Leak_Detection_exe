@@ -6,6 +6,7 @@ const API_KEY = "";
 const App: React.FC = () => {
   const [fileName, setFileName] = useState<string | null>(null);
   const [status, setStatus] = useState<string>("PDF 파일을 드래그하세요");
+  const [resultText, setResultText] = useState<string>("");
 
   const handleDrop = useCallback(async (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -16,7 +17,7 @@ const App: React.FC = () => {
     }
 
     setFileName(file.name);
-    setStatus("업로드 중... 🚀");
+    setStatus("분석 중... 🚀");
   
     try {
       // 업로드한 파일의 텍스트 추출
@@ -42,6 +43,9 @@ const App: React.FC = () => {
       console.log(fileText)
       //
 
+      // 결과값을 임시로 추출된 텍스트 표시
+      setResultText(fileText);
+
       const uploadFormData = new FormData();
       uploadFormData.append("text", fileText);
 
@@ -51,9 +55,9 @@ const App: React.FC = () => {
       });
 
       if (res.ok) {
-        setStatus("업로드 완료 ✅");
+        setStatus("분석 완료 ✅");
       } else {
-        setStatus("업로드 실패 ❌");
+        setStatus("분석 실패 ❌");
       }
     } catch (error) {
       console.error("Error:", error);
@@ -65,24 +69,48 @@ const App: React.FC = () => {
   };
 
   return (
-    <div
-      onDrop={handleDrop}
-      onDragOver={handleDragOver}
-      style={{
-        width: "100vw",
-        height: "100vh",
-        background: "#f2f2f2",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        flexDirection: "column",
-        border: "3px dashed #aaa",
-        color: "#333",
-        fontFamily: "sans-serif",
-      }}
-    >
-      <h1>{status}</h1>
-      {fileName && <p>파일: {fileName}</p>}
+    <div style={{ width: "100vw", height: "100vh", fontFamily: "sans-serif" }}>
+      <header style={{ padding: "20px", textAlign: "center", fontSize: "30px", fontWeight: "bold" }}>
+        개인정보 유출 탐지
+      </header>
+      <div style={{ display: "flex", height: "calc(100vh - 85px)" }}>
+        {/* pdf 업로드 창 */}
+        <div
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+          style={{
+            flex: 1,
+            margin: "20px",
+            border: "3px dashed #aaa",
+            borderRadius: "10px",
+            padding: "20px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            background: "#fafafa",
+            textAlign: "center",
+          }}
+        >
+          <h2>{status}</h2>
+          {fileName && <p>파일: {fileName}</p>}
+        </div>
+        {/* 분석 결과 창 */}
+        <div
+          style={{
+            flex: 1,
+            margin: "20px",
+            border: "3px solid #ccc",
+            borderRadius: "10px",
+            padding: "20px",
+            background: "white",
+            overflowY: "auto",
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {resultText}
+        </div>
+      </div>
     </div>
   );
 };
